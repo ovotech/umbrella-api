@@ -1,5 +1,6 @@
 package com.ovoenergy.umbrella.dao
 
+import com.github.tototoshi.slick.MySQLJodaSupport._
 import com.ovoenergy.umbrella.entities.{PackageT, ProjectT, ProjectVersionT}
 import slick.driver.MySQLDriver.api._
 import slick.lifted.TableQuery
@@ -14,7 +15,7 @@ class ProjectDao(database: Database) {
   }
 
   def versions(project: String) = database.run {
-    TableQuery[ProjectVersionT].filter(_.projectName === project).result
+    TableQuery[ProjectVersionT].filter(_.projectName === project).sortBy(_.date.desc).result
   }
 }
 

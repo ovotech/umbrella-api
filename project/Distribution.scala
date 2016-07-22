@@ -8,7 +8,7 @@ object Distribution {
     packageName in Docker := name.value,
     dockerRepository := Some("ovotech"),
     dockerUpdateLatest := true,
-    dockerExposedPorts := Seq(8080, 8081),
+    dockerExposedPorts := Seq(8080),
     awsBucket := "ovo-docker-apps",
     awsRegion := Regions.EU_WEST_1,
     awsVersion := sys.env.getOrElse("GO_PIPELINE_COUNTER", ""))

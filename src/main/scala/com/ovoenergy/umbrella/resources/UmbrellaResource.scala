@@ -1,39 +1,33 @@
 package com.ovoenergy.umbrella.resources
 
 import com.ovoenergy.commons.service.HttpService
-import com.ovoenergy.umbrella.dao.ProjectDaoComponent
 import com.ovoenergy.umbrella.entities._
+import com.ovoenergy.umbrella.services.UmbrellaServiceComponent
 import spray.httpx.unmarshalling.UnmarshallerLifting
 
-import scala.concurrent.Future
+trait UmbrellaResource extends HttpService with UnmarshallerLifting {
+  self: UmbrellaServiceComponent =>
 
-trait UmbrellaResource extends HttpService with UnmarshallerLifting with ProjectDaoComponent {
   val umbrellaResource =
     path("projects") {
       get {
         complete {
-          projectDao.listProjects
+          umbrellaService.listProjects
         }
       }
     } ~ path("project" / """[\w-]+""".r) { project =>
       get {
         complete {
-          val packages: Future[Seq[ProjectPackage]] = projectDao.listPackagesIn(project)
-          val versions: Future[Seq[ProjectVersion]] = projectDao.listVersionsByDateFor(project)
-          (packages zip versions) map ProjectDetailsResponse.tupled
+          umbrellaService.projectDetails(project)
         }
       }
     } ~ path("cobertura") {
       post {
-        headerValueByName("Project-Name") { projectName =>
+        headerValueByName("Project-Name") { project =>
           headerValueByName("Project-Version") { version =>
-            entity(as[CoberturaReport](CoberturaReport.unmarshaller)) { e =>
+            entity(as[CoberturaReport](CoberturaReport.unmarshaller)) { report =>
               complete {
-                for {
-                  result <- projectDao.setProject(projectName, version, e.coverage)
-                  _ <- projectDao.addVersion(projectName, version, e.date, e.coverage)
-                  _ <- projectDao.setPackages(projectName, e.packages)
-                } yield result
+                umbrellaService.loadReport(project, version, report)
               }
             }
           }

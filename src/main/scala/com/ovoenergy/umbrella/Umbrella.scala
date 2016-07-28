@@ -8,7 +8,7 @@ import com.ovoenergy.umbrella.core.UmbrellaService
 import spray.can.Http
 
 object Umbrella extends App with ConfigProvider {
-  implicit val system = ActorSystem("qs-quote-service")
+  implicit val system = ActorSystem("umbrella-service")
   val port = config.getInt("http-service.port")
   val tcpListener = system.actorOf(Props[TcpListener], "tcp-listener")
 

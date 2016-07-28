@@ -34,7 +34,10 @@ class ProjectDao(database: Database)(implicit executionContext: ExecutionContext
   }
 
   def addVersion(projectName: String, version: String, date: DateTime, coverage: Float) = database.run {
-    versions += ProjectVersion(projectName, version, date, coverage)
+    DBIO.seq(
+      versions.filter(v => v.projectName === projectName && v.version === version).delete,
+      versions += ProjectVersion(projectName, version, date, coverage)
+    )
   }
 
   def setPackages(projectName: String, packageCoverages: List[(String, Float)]) = database.run {
